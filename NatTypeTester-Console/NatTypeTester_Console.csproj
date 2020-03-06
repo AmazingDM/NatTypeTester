@@ -2,8 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <RootNamespace>NatTypeTester_Console</RootNamespace>
+    <LangVersion>8</LangVersion>
+    <ApplicationIcon />
+    <StartupObject />
+    <PackageId>NTT</PackageId>
+    <Authors>NTT</Authors>
+    <Company>NTT</Company>
+    <Product>NTT</Product>
+    <AssemblyName>NTT</AssemblyName>
   </PropertyGroup>
 
   <Import Project="..\Common\Common.projitems" Label="Shared" />
