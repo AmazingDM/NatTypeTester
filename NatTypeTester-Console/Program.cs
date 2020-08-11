@@ -1,4 +1,5 @@
-﻿using STUN.Utils;
+﻿using STUN.StunResult;
+using STUN.Utils;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -49,13 +50,6 @@ namespace NatTypeTester_Console
                     result = -3;
                     break;
                 case STUN.Enums.MappingBehavior.Direct:
-                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.EndpointIndependent)
-                        result = 1;
-                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressDependent)
-                        result = 2;
-                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressAndPortDependent)
-                        result = 2;
-                    break;
                 case STUN.Enums.MappingBehavior.EndpointIndependent:
                     if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.EndpointIndependent)
                         result = 1;
@@ -70,9 +64,6 @@ namespace NatTypeTester_Console
                 case STUN.Enums.MappingBehavior.AddressAndPortDependent:
                     result = 4;
                     break;
-                /*case STUN.Enums.MappingBehavior.Fail:
-                    result = -3;
-                    break;*/
                 default:
                     break;
             }
