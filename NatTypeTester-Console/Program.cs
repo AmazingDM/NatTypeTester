@@ -35,6 +35,48 @@ namespace NatTypeTester_Console
             Console.WriteLine($@"Mapped address: {res.PublicEndPoint}");
             Console.WriteLine($@"Nat mapping behavior: {res.MappingBehavior}");
             Console.WriteLine($@"Nat filtering behavior: {res.FilteringBehavior}");
+
+            var result = 0;
+            switch (res.MappingBehavior)
+            {
+                case STUN.Enums.MappingBehavior.Unknown:
+                    result = -1;
+                    break;
+                case STUN.Enums.MappingBehavior.UnsupportedServer:
+                    result = -2;
+                    break;
+                case STUN.Enums.MappingBehavior.Fail:
+                    result = -3;
+                    break;
+                case STUN.Enums.MappingBehavior.Direct:
+                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.EndpointIndependent)
+                        result = 1;
+                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressDependent)
+                        result = 2;
+                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressAndPortDependent)
+                        result = 2;
+                    break;
+                case STUN.Enums.MappingBehavior.EndpointIndependent:
+                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.EndpointIndependent)
+                        result = 1;
+                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressDependent)
+                        result = 2;
+                    if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressAndPortDependent)
+                        result = 2;
+                    break;
+                case STUN.Enums.MappingBehavior.AddressDependent:
+                    result = 3;
+                    break;
+                case STUN.Enums.MappingBehavior.AddressAndPortDependent:
+                    result = 4;
+                    break;
+                /*case STUN.Enums.MappingBehavior.Fail:
+                    result = -3;
+                    break;*/
+                default:
+                    break;
+            }
+            Console.WriteLine($@"[result]: {result}");
         }
     }
 }
