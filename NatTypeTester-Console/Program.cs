@@ -30,44 +30,44 @@ namespace NatTypeTester_Console
             }
 
             var res = await NetUtils.NatBehaviorDiscovery(server, port, local);
-            Console.WriteLine($@"Other address is {res.OtherEndPoint}");
+            Console.WriteLine($@"Other address is: {res.OtherEndPoint}");
             Console.WriteLine($@"Binding test: {res.BindingTestResult}");
             Console.WriteLine($@"Local address: {res.LocalEndPoint}");
             Console.WriteLine($@"Mapped address: {res.PublicEndPoint}");
             Console.WriteLine($@"Nat mapping behavior: {res.MappingBehavior}");
             Console.WriteLine($@"Nat filtering behavior: {res.FilteringBehavior}");
 
-            var result = 0;
+            var result = "error";
             switch (res.MappingBehavior)
             {
                 case STUN.Enums.MappingBehavior.Unknown:
-                    result = -1;
+                    result = STUN.Enums.MappingBehavior.Unknown.ToString();
                     break;
                 case STUN.Enums.MappingBehavior.UnsupportedServer:
-                    result = -2;
+                    result = STUN.Enums.MappingBehavior.UnsupportedServer.ToString();
                     break;
                 case STUN.Enums.MappingBehavior.Fail:
-                    result = -3;
+                    result = STUN.Enums.MappingBehavior.Fail.ToString();
                     break;
                 case STUN.Enums.MappingBehavior.Direct:
                 case STUN.Enums.MappingBehavior.EndpointIndependent:
                     if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.EndpointIndependent)
-                        result = 1;
+                        result = "FullCone";
                     if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressDependent)
-                        result = 2;
+                        result = "Restricted Cone";
                     if (res.FilteringBehavior == STUN.Enums.FilteringBehavior.AddressAndPortDependent)
-                        result = 2;
+                        result = "Restricted Cone";
                     break;
                 case STUN.Enums.MappingBehavior.AddressDependent:
-                    result = 3;
+                    result = "Port Restricted Cone";
                     break;
                 case STUN.Enums.MappingBehavior.AddressAndPortDependent:
-                    result = 4;
+                    result = "Symmetric";
                     break;
                 default:
                     break;
             }
-            Console.WriteLine($@"[result]: {result}");
+            Console.WriteLine($@"result: {result}");
         }
     }
 }
