@@ -1,10 +1,11 @@
-﻿using NatTypeTester.Model;
-using STUN.Utils;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
+using NatTypeTester.ViewModels;
+using ReactiveUI;
 
 namespace NatTypeTester
 {
@@ -13,70 +14,92 @@ namespace NatTypeTester
         public MainWindow()
         {
             InitializeComponent();
-            LoadStunServer();
-        }
+            ViewModel = new MainWindowViewModel();
 
-        public static HashSet<string> StunServers { get; set; } = new HashSet<string>
-        {
-                @"stun.qq.com",
-                @"stun.miwifi.com",
-                @"stun.bige0.com",
-                @"stun.syncthing.net",
-                @"stun.stunprotocol.org"
-        };
-
-        private async void TestButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            var stun = new StunServer();
-            if (stun.Parse(ServersComboBox.Text))
+            this.WhenActivated(disposableRegistration =>
             {
-                var server = stun.Hostname;
-                var port = stun.Port;
-                var local = LocalEndTextBox.Text;
-                TestButton.IsEnabled = false;
-                await Task.Run(() =>
-                {
-                    var (natType, localEnd, publicEnd) = NetUtils.NatTypeTestCore(local, server, port);
+                #region Server
 
-                    Dispatcher?.InvokeAsync(() =>
-                    {
-                        NatTypeTextBox.Text = natType;
-                        LocalEndTextBox.Text = localEnd;
-                        PublicEndTextBox.Text = publicEnd;
-                        TestButton.IsEnabled = true;
-                    });
-                });
-            }
-            else
-            {
-                MessageBox.Show(@"Wrong Stun server!", @"NatTypeTester", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+                this.Bind(ViewModel,
+                        vm => vm.StunServer,
+                        v => v.ServersComboBox.Text
+                ).DisposeWith(disposableRegistration);
 
-        private void MainWindow_OnKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                TestButton_OnClick(this, new RoutedEventArgs());
-            }
-        }
+                this.OneWayBind(ViewModel,
+                        vm => vm.StunServers,
+                        v => v.ServersComboBox.ItemsSource
+                ).DisposeWith(disposableRegistration);
 
-        private async void LoadStunServer()
-        {
-            const string path = @"stun.txt";
-            if (File.Exists(path))
-            {
-                using var sw = new StreamReader(path);
-                string line;
-                var stun = new StunServer();
-                while ((line = await sw.ReadLineAsync()) != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(line) && stun.Parse(line))
-                    {
-                        StunServers.Add(stun.ToString());
-                    }
-                }
-            }
+                #endregion
+
+                #region RFC3489
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.ClassicNatType,
+                        v => v.NatTypeTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                        vm => vm.LocalEnd,
+                        v => v.LocalEndTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.PublicEnd,
+                        v => v.PublicEndTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                                viewModel => viewModel.TestClassicNatType,
+                                view => view.TestButton)
+                        .DisposeWith(disposableRegistration);
+
+                RFC3489Tab.Events().KeyDown
+                        .Where(x => x.Key == Key.Enter && TestButton.IsEnabled)
+                        .Subscribe(y => { TestButton.Command.Execute(Unit.Default); })
+                        .DisposeWith(disposableRegistration);
+
+                #endregion
+
+                #region RFC5780
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.BindingTest,
+                        v => v.BindingTestTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.MappingBehavior,
+                        v => v.MappingBehaviorTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.FilteringBehavior,
+                        v => v.FilteringBehaviorTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                        vm => vm.LocalAddress,
+                        v => v.LocalAddressTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.MappingAddress,
+                        v => v.MappingAddressTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                                viewModel => viewModel.DiscoveryNatType,
+                                view => view.DiscoveryButton)
+                        .DisposeWith(disposableRegistration);
+
+                RFC5780Tab.Events().KeyDown
+                        .Where(x => x.Key == Key.Enter && DiscoveryButton.IsEnabled)
+                        .Subscribe(y => { DiscoveryButton.Command.Execute(Unit.Default); })
+                        .DisposeWith(disposableRegistration);
+
+                #endregion
+            });
         }
     }
 }
